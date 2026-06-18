@@ -1,10 +1,16 @@
 <template>
-  <h1>{{ task.title }}</h1>
-  <p>{{ task.description }}</p>
-  <button v-if="!task.done" @click="store.markDone(task.id)">Done</button>
-  <button v-else @click="store.markUndone(task.id)">Undone</button>
-  <button @click="deleteTask()">Delete</button>
-  <button @click="router.push('/')">&lt;- Back</button>
+  <div v-if="task">
+    <h1>{{ task.title }}</h1>
+    <p>{{ task.description }}</p>
+    <button v-if="!task.done" @click="store.markDone(task.id)">Done</button>
+    <button v-else @click="store.markUndone(task.id)">Undone</button>
+    <button @click="deleteTask">Delete</button>
+    <button @click="router.push('/')">&lt;- Back</button>
+  </div>
+  <div v-else>
+    <h2>Task not found</h2>
+    <button @click="router.push('/')">Go home</button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -18,7 +24,7 @@ const taskId = Number(route.params.id)
 const task = store.getTask(taskId)
 
 function deleteTask() {
-  store.removeTask(task.id)
+  if (task) store.removeTask(task.id)
   router.push('/')
 }
 </script>

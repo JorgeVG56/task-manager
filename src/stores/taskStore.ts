@@ -1,9 +1,27 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import type Task from '../types/Task'
+import type { Task } from '../types/Task'
 
 export const useTaskStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
+
+  const saved = localStorage.getItem('tasks')
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed)) tasks.value = parsed
+    } catch {
+      localStorage.removeItem('tasks')
+    }
+  }
+
+  watch(
+    tasks,
+    (newTasks) => {
+      localStorage.setItem('tasks', JSON.stringify(newTasks))
+    },
+    { deep: true },
+  )
 
   const totalCount = computed<number>(() => tasks.value.length)
 
@@ -20,10 +38,8 @@ export const useTaskStore = defineStore('tasks', () => {
     })
   }
 
-  function getTask(id: number): Task {
-    const task = tasks.value.find((t) => t.id === id)
-    if (task) return task
-    return { id: -1, title: 'notFound', description: 'notFound', done: false }
+  function getTask(id: number): Task | undefined {
+    return tasks.value.find((t) => t.id === id)
   }
 
   function markDone(id: number): void {
